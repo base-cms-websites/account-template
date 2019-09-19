@@ -1,0 +1,24 @@
+{
+  "name": "@base-cms-websites/account-template",
+  "description": "Account repository template",
+  "repository": "https://github.com/base-cms-websites/account-template.git",
+  "author": "Jacob Bare <jacob@limit0.io>",
+  "license": "MIT",
+  "private": true,
+  "root": true,
+  "workspaces": [
+    "packages/*",
+    "sites/*"
+  ],
+  "scripts": {
+    "compile": "lerna run compile",
+    "lint": "lerna run lint",
+    "lint:css": "lerna run lint:css",
+    "lint:js": "lerna run lint:js",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "@base-cms/marko-compiler": "^1.0.0-alpha.1",
+    "lerna": "^3.16.4"
+  }
+}

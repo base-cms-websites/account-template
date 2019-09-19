@@ -1,0 +1,75 @@
+version: '3.7'
+
+x-node-defaults: &node
+  tty: true
+  init: true
+  image: node:10.15
+  entrypoint: ["node"]
+  working_dir: /root
+  restart: always
+  volumes:
+    - ./:/root:cached
+    - ./node_modules:/root/node_modules:delegated
+    - yarn-cache:/.yarn-cache
+
+x-env-defaults: &env
+  NEW_RELIC_ENABLED: ${NEW_RELIC_ENABLED-0}
+  NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY-(unset)}
+  NODE_ENV: development
+  # @todo the recaptcha values should be removed (?) once contact-us is moved to core.
+  RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY-(unset)}
+  # @todo the sendgrid values should be removed once the @base-cms/mailer service is created.
+  SENDGRID_API_KEY: ${SENDGRID_API_KEY-(unset)}
+  SENDGRID_DEV_TO: developer@endeavorb2b.com
+  YARN_CACHE_FOLDER: /.yarn-cache
+
+x-env-aerilon: &env-aerilon-staging
+  GRAPHQL_URI: ${GRAPHQL_URI-https://aerilon.graphql-staging.base-cms.io}
+  OEMBED_URI: ${OEMBED_URI-https://aerilon.oembed-staging.base-cms.io}
+  RSS_URI: ${RSS_URI-https://aerilon.rss-staging.base-cms.io}
+  SITEMAPS_URI: ${SITEMAPS_URI-https://aerilon.sitemaps-staging.base-cms.io}
+
+x-env-development: &env-development
+  GRAPHQL_URI: ${GRAPHQL_URI-http://host.docker.internal:10002}
+  OEMBED_URI: ${OEMBED_URI-http://host.docker.internal:10013}
+  RSS_URI: ${RSS_URI-http://host.docker.internal:10011}
+  SITEMAPS_URI: ${SITEMAPS_URI-http://host.docker.internal:10009}
+
+x-site-command: &site-cmd
+  entrypoint: ["node_modules/.bin/basecms-website"]
+  command: ["dev", "index.js"]
+
+volumes:
+  yarn-cache: {}
+
+services:
+  terminal:
+    <<: *node
+    working_dir: /root
+    entrypoint: ["/bin/bash"]
+    environment:
+      <<: *env
+
+  yarn:
+    <<: *node
+    working_dir: /root
+    entrypoint: ["yarn"]
+    environment:
+      <<: *env
+
+  # mywebsite:
+  #   <<: *node
+  #   <<: *site-cmd
+  #   working_dir: /root/sites/mywebsite
+  #   environment:
+  #     <<: *env
+  #     <<: *env-aerilon-staging
+  #     PORT: 80
+  #     EXPOSED_PORT: 9710
+  #     LIVERELOAD_PORT: 19710
+  #     TENANT_KEY: account_group
+  #     CDN_IMAGE_HOSTNAME: img.mywebsite.com
+  #     CDN_ASSET_HOSTNAME: cdn.mywebsite.com
+  #   ports:
+  #     - "9710:80"
+  #     - "19710:19710"
